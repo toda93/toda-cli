@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import Table from 'cli-table2';
 import {execSync} from 'child_process';
 
-import {readlineSync} from 'src/ultilities/command/console';
+import {readlineSync} from './command/console';
 
 export default class CLI {
 
