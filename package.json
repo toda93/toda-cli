@@ -1,0 +1,55 @@
+{
+  "name": "toda-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toda93/toda-cli.git"
+  },
+  "engines": {
+    "node": ">= 10.0.0",
+    "npm": "^6.0.0"
+  },
+  "keywords": [
+    "toda",
+    "nodejs",
+    "toda cli",
+    "toda api vendor"
+  ],
+  "author": "toda <sp.azsolution.net@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/toda93/telegram-api/issues"
+  },
+  "homepage": "https://github.com/toda93/telegram-api#readme",
+  "dependencies": {
+    "@babel/runtime": "^7.7.6",
+    "readline": "^1.3.0",
+    "strip-bom": "^4.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/plugin-transform-async-to-generator": "^7.7.4",
+    "@babel/plugin-transform-runtime": "^7.7.6",
+    "@babel/preset-env": "^7.7.6",
+    "chalk": "^3.0.0",
+    "cli-table2": "^0.2.0",
+    "js-beautify": "^1.10.3",
+    "lodash": "^4.17.15"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ],
+    "plugins": [
+      "@babel/plugin-transform-runtime"
+    ]
+  },
+  "scripts": {
+    "pretest": "babel src --out-dir lib",
+    "test": "node lib/test.js",
+    "prepublish": "babel src --out-dir lib"
+  }
+}
