@@ -19,7 +19,7 @@ All params used **underscore case**
         Ex: toda-cli -api --create-repository=user
 2. PM2
     - -pm2: command pm2 flag (required)
-    - --type: ==microservices== or ==monolithic== (default is **monolithic**)
+    - --type: `microservices` or `monolithic` (default is **monolithic**)
     - --port: start port for API (default is **4001**)
     
     > Ex: toda-cli -pm2 --type=microservices --port=4001
