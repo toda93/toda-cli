@@ -1,0 +1,90 @@
+import ROLES from 'src/constants/roles';
+import <%= camel_name %>Service from 'src/services/data/mySQL/root/<%= camel_name %>Service';
+import roleMiddleware from 'src/projects/API/middlewares/roleMiddleware';
+import {filterMiddleware} from 'src/projects/API/middlewares/filterMiddleware';
+import {HTTP_METHOD} from 'src/constants/system';
+
+
+const filter_options = {
+sort: {
+allows: []
+},
+search: {
+allows: []
+}
+};
+
+const <%= camel_name %>Controller = {
+filter: {
+path: '/<%= snake_name %>s',
+type: HTTP_METHOD.GET,
+method: [
+roleMiddleware([ROLES.<%= upper_name %>.READ]),
+filterMiddleware(filter_options),
+async (req, res) => {
+const data = await <%= camel_name %>Service.getAll(req.filter);
+return res.success(data);
+}
+],
+},
+detail: {
+path: '/<%= snake_name %>s/:id(\\d+)',
+type: HTTP_METHOD.GET,
+method: [
+roleMiddleware([ROLES.<%= upper_name %>.READ]),
+async (req, res) => {
+const data = await <%= camel_name %>Service.getOneBy('id', req.params.id);
+return res.success(data);
+}
+],
+},
+create: {
+path: '/<%= snake_name %>s',
+type: HTTP_METHOD.POST,
+method: [
+roleMiddleware([ROLES.<%= upper_name %>.MODIFY]),
+async (req, res) => {
+const data = await <%= camel_name %>Service.create({
+...req.body,
+created_id: req.user.id,
+updated_id: req.user.id,
+});
+return res.success(data);
+}
+],
+},
+update: {
+path: '/<%= snake_name %>s/:id(\\d+)',
+type: HTTP_METHOD.PUT,
+method: [
+roleMiddleware([ROLES.<%= upper_name %>.MODIFY]),
+async (req, res) => {
+const data = await <%= camel_name %>Service.update(req.params.id, {
+...req.body,
+updated_id: req.user.id,
+});
+return res.success(data);
+}
+],
+},
+delete: {
+path: '/<%= snake_name %>s/:id(\\d+)',
+type: HTTP_METHOD.DELETE,
+method: [
+roleMiddleware([ROLES.<%= upper_name %>.DELETE]),
+async (req, res) => {
+const data = await <%= camel_name %>Service.delete(req.params.id);
+return res.success(data);
+}
+],
+},
+};
+
+export default <%= camel_name %>Controller;
+
+
+
+
+
+
+

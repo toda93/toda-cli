@@ -1,17 +1,40 @@
 #!/usr/bin/env node
+import GenerateAPITool from './generate/GenerateAPITool';
 
-import CLI from './CLI';
+function getArgs() {
+    const args = {};
+    process.argv
+        .slice(2, process.argv.length)
+        .forEach(arg => {
+            // long arg
+            if (arg.slice(0, 2) === '--') {
+                const longArg = arg.split('=');
+                const longArgFlag = longArg[0].slice(2, longArg[0].length);
+                const longArgValue = longArg.length > 1 ? longArg[1] : true;
+                args[longArgFlag] = longArgValue;
+            }
+            // flags
+            else if (arg[0] === '-') {
+                const flags = arg.slice(1, arg.length).split('');
+                flags.forEach(flag => {
+                    args[flag] = true;
+                });
+            }
+        });
+    return args;
+}
 
-const root = new CLI('Enter keyword to run tool');
-const development = new CLI('Enter keyword to run tool');
 
-root.push({
-    name: 'Development',
-    detail: 'Tool for developer',
-    callback:
-        async () => {
-            await development.show();
-        }
-});
-root.show();
+const args = getArgs();
+
+
+
+(async () => {
+    if (args['create']) {
+        await GenerateAPITool.createAll(args['create']);
+    }
+})();
+
+
+
 
