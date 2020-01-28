@@ -1,6 +1,6 @@
 # toda-api
----
-### Use toda-api with toda-api-vendor 
+
+### Use toda-api for toda-api-vendor 
 
 All params used **underscore case**
 
