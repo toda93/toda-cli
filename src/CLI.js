@@ -3,7 +3,8 @@ import chalk from 'chalk';
 import Table from 'cli-table2';
 import {execSync} from 'child_process';
 
-import {readlineSync} from './command/console';
+import readline from 'readline';
+import stripBOM from 'strip-bom';
 
 export default class CLI {
 
@@ -61,5 +62,20 @@ export default class CLI {
     push(item) {
         this.data.push(item);
     }
+}
+
+
+export function readlineSync(question) {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    return new Promise((resolve) => {
+        rl.question(question, function (answer) {
+            rl.close();
+            return resolve(stripBOM(answer));
+        });
+    });
 }
 

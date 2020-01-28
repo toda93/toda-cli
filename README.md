@@ -1,8 +1,8 @@
 # toda-api
 ---
-###Use toda-api with toda-api-vendor 
+### Use toda-api with toda-api-vendor 
 
-All params used underscore case
+All params used **underscore case**
 
 1. API
     - -api: command API flag (required)
@@ -19,8 +19,8 @@ All params used underscore case
         Ex: toda-cli -api --create-repository=user
 2. PM2
     - -pm2: command pm2 flag (required)
-    - --type: ==microservices== or ==monolithic== (default is *monolithic*)
-    - --port: start port for API (default is *4001*)
+    - --type: ==microservices== or ==monolithic== (default is **monolithic**)
+    - --port: start port for API (default is **4001**)
     
     > Ex: toda-cli -pm2 --type=microservices --port=4001
 
