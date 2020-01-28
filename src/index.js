@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import GenerateAPITool from './generate/GenerateAPITool';
+import GenerateTool from './generate';
 
 function getArgs() {
     const args = {};
@@ -27,12 +27,23 @@ function getArgs() {
 
 const args = getArgs();
 
-
+console.log(args);
 
 (async () => {
-    if (args['create']) {
-        await GenerateAPITool.createAll(args['create']);
+    if (args['api']) {
+        if (args['create']) {
+            await GenerateTool.createAllAPI(args['create']);
+        } else if (args['create-model']) {
+            await GenerateTool.createRepositoryAPI(args['create-model']);
+        } else if (args['create-repository']) {
+            await GenerateTool.createRepositoryAPI(args['create-repository']);
+        } else if (args['create-controller']) {
+            await GenerateTool.createRepositoryAPI(args['create-controller']);
+        }
+    } else if (args['pm2']) {
+        await GenerateTool.createPM2(args['type'], args['port']);
     }
+
 })();
 
 
