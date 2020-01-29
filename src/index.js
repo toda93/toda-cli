@@ -23,12 +23,7 @@ function getArgs() {
         });
     return args;
 }
-
-
 const args = getArgs();
-
-console.log(args);
-
 (async () => {
     if (args['api']) {
         if (args['create']) {

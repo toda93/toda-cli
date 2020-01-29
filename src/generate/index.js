@@ -41,7 +41,6 @@ class GenerateTool {
     }
 
     static createPM2(type = 'monolithic', port = 4001) {
-
         if (['monolithic', 'microservices'].includes(type)) {
             let pm2Json = {
                 apps: []
