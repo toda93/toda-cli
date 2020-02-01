@@ -37,6 +37,8 @@ const args = getArgs();
         }
     } else if (args['pm2']) {
         await GenerateTool.createPM2(args['type'], args['port']);
+    }  else if (args['role']) {
+        await GenerateTool.addRole(args['name']);
     }
 
 })();

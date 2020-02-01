@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import mkdirp from 'mkdirp';
 import ejs from 'ejs';
-import {js as js_beautify} from 'js-beautify';
+import { js as js_beautify } from 'js-beautify';
 import util from 'util';
 import fs from 'fs';
 import path from 'path';
@@ -11,36 +11,36 @@ const templateDir = path.resolve('./templates');
 const currentDir = process.cwd();
 
 class GenerateTool {
-    static createAPIPathIfExists(name) {
+    static async createAPIPathIfExists(name) {
         if (name) {
             const path = `${currentDir}/src/app/api/services/${name}`;
             if (!fs.existsSync(path)) {
-                mkdirp(path);
+                await mkdirp(path);
             }
         } else {
             throw new Error('Empty name create');
         }
     }
 
-    static createModelAPI(name) {
-        this.createAPIPathIfExists(name);
+    static async createModelAPI(name) {
+        await this.createAPIPathIfExists(name);
     }
 
-    static createRepositoryAPI(name) {
-        this.createAPIPathIfExists(name);
+    static async createRepositoryAPI(name) {
+        await this.createAPIPathIfExists(name);
     }
 
-    static createControllerAPI(name) {
-        this.createAPIPathIfExists(name);
+    static async createControllerAPI(name) {
+        await this.createAPIPathIfExists(name);
     }
 
-    static createAllAPI(name) {
+    static async createAllAPI(name) {
         this.createModelAPI(name);
         this.createRepositoryAPI(name);
         this.createControllerAPI(name);
     }
 
-    static createPM2(type = 'monolithic', port = 4001) {
+    static async createPM2(type = 'monolithic', port = 4001) {
         if (['monolithic', 'microservices'].includes(type)) {
             let pm2Json = {
                 apps: []
@@ -81,15 +81,33 @@ class GenerateTool {
             console.error(`pm2 type ${type} not exists`);
         }
     }
+
+    static async addRole(name) {
+        name = name.toUpperCase();
+
+        const apiPath = `${currentDir}/src/app/api`;
+        if (!fs.existsSync(apiPath)) {
+            await mkdirp(apiPath);
+        }
+        let rolesJson = {};
+        const rolesPath = `${apiPath}/roles.json`;
+        if (fs.existsSync(rolesPath)) {
+            rolesJson = require(rolesPath);
+        }
+
+        console.log(rolesJson);
+
+        if (!rolesJson[name]) {
+            rolesJson[name] = {
+                name: {
+                    "READ": `${name}_READ`,
+                    "MODIFY": `${name}_MODIFY`,
+                    "DELETE": `${name}_DELETE`
+                }
+            }
+        }
+        fs.writeFileSync(rolesPath, js_beautify(JSON.stringify(rolesJson)));
+    }
 }
 
 export default GenerateTool;
-
-
-
-
-
-
-
-
-
