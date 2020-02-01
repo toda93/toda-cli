@@ -95,8 +95,6 @@ class GenerateTool {
             rolesJson = require(rolesPath);
         }
 
-        console.log(rolesJson);
-
         if (!rolesJson[name]) {
             rolesJson[name] = {
                 name: {
@@ -106,6 +104,9 @@ class GenerateTool {
                 }
             }
         }
+
+        console.log(rolesJson);
+
         fs.writeFileSync(rolesPath, js_beautify(JSON.stringify(rolesJson)));
     }
 }
