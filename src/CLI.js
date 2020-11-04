@@ -1,81 +1,70 @@
-import _ from 'lodash';
-import chalk from 'chalk';
-import Table from 'cli-table2';
-import {execSync} from 'child_process';
+import arg from 'arg';
+import inquirer from 'inquirer';
+import { createProject } from './main';
 
-import readline from 'readline';
-import stripBOM from 'strip-bom';
-
-export default class CLI {
-
-    constructor(question) {
-        this.data = [{
-            name: 'Exit',
-            detail: 'Press 0 to exit',
-            callback: () => {
-                process.exit(0);
-            }
-        }];
-        this.question = question;
+function parseArgumentsIntoOptions(rawArgs) {
+  const args = arg(
+    {
+      '--git': Boolean,
+      '--yes': Boolean,
+      '--install': Boolean,
+      '-g': '--git',
+      '-y': '--yes',
+      '-i': '--install',
+    },
+    {
+      argv: rawArgs.slice(2),
     }
-
-    _showTable() {
-        if (this.data.length > 1) {
-            const table = new Table({
-                head: ['Key', 'Name', 'Detail']
-            });
-
-            _.forEach(this.data, (tool, key) => {
-                table.push([key, chalk.yellow.bold(tool.name), tool.detail]);
-            });
-            console.log(table.toString());
-            console.log(`   + Press ${chalk.red.bold('T')} to show table again`);
-            console.log(`   + Press ${chalk.red.bold('B')} to back`);
-        }
-    }
-
-    async _getCommand() {
-        const key = await readlineSync(this.question + ': ');
-
-        if (this.data.length > 1) {
-            if (key === 't' || key === 'T') {
-                await this.show();
-            } else if (key === 'b' || key === 'B') {
-                return;
-            }
-        }
-        if (_.keys(this.data).includes(key)) {
-            await this.data[key].callback();
-            await execSync('sleep 2');
-            await this.show();
-        } else {
-            console.error('Keyword incorrect (-_-~!)');
-            await this._getCommand();
-        }
-    }
-
-    async show() {
-        this._showTable();
-        await this._getCommand();
-    }
-
-    push(item) {
-        this.data.push(item);
-    }
+  );
+  return {
+    skipPrompts: args['--yes'] || false,
+    git: args['--git'] || false,
+    template: args._[0],
+    runInstall: args['--install'] || false,
+  };
 }
 
+async function promptForMissingOptions(options) {
+  const defaultTemplate = 'javascript';
+  if (options.skipPrompts) {
+    return {
+      ...options,
+      template: options.template || defaultTemplate,
+    };
+  }
 
-export function readlineSync(question) {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
+  const questions = [];
+  if (!options.template) {
+    questions.push({
+      type: 'list',
+      name: 'template',
+      message: 'Please choose which project template to use',
+      choices: ['javascript', 'typescript'],
+      default: defaultTemplate,
     });
+  }
 
-    return new Promise((resolve) => {
-        rl.question(question, function (answer) {
-            rl.close();
-            return resolve(stripBOM(answer));
-        });
+  if (!options.git) {
+    questions.push({
+      type: 'confirm',
+      name: 'git',
+      message: 'Should a git be initialized?',
+      default: false,
     });
+  }
+
+  const answers = await inquirer.prompt(questions);
+  return {
+    ...options,
+    template: options.template || answers.template,
+    git: options.git || answers.git,
+  };
 }
 
+export async function cli(args) {
+  let options = parseArgumentsIntoOptions(args);
+  options = await promptForMissingOptions(options);
+  await createProject(options);
+}
+
+// ...
