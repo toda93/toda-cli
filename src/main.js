@@ -1,114 +1,76 @@
-import chalk from 'chalk';
-import execa from 'execa';
+import _ from 'lodash';
 import fs from 'fs';
-import gitignore from 'gitignore';
+import pluralize from 'pluralize';
 import Listr from 'listr';
-import ncp from 'ncp';
-import path from 'path';
-import { projectInstall } from 'pkg-install';
-import license from 'spdx-license-list/licenses/MIT';
-import { promisify } from 'util';
+import mkdirp from 'mkdirp';
+import { js as js_beautify } from 'js-beautify';
+import ejs from 'ejs';
 
-const access = promisify(fs.access);
-const writeFile = promisify(fs.writeFile);
-const copy = promisify(ncp);
-const writeGitignore = promisify(gitignore.writeFile);
 
-async function copyTemplateFiles(options) {
-  return copy(options.templateDirectory, options.targetDirectory, {
-    clobber: false,
-  });
-}
+const templateControllerDir = `${__dirname}/templates/controller`;
 
-async function createGitignore(options) {
-  const file = fs.createWriteStream(
-    path.join(options.targetDirectory, '.gitignore'),
-    { flags: 'a' }
-  );
-  return writeGitignore({
-    type: 'Node',
-    file: file,
-  });
-}
 
-async function createLicense(options) {
-  const targetPath = path.join(options.targetDirectory, 'LICENSE');
-  const licenseContent = license.licenseText
-    .replace('<year>', new Date().getFullYear())
-    .replace('<copyright holders>', `${options.name} (${options.email})`);
-  return writeFile(targetPath, licenseContent, 'utf8');
-}
-
-async function initGit(options) {
-  const result = await execa('git', ['init'], {
-    cwd: options.targetDirectory,
-  });
-  if (result.failed) {
-    return Promise.reject(new Error('Failed to initialize git'));
-  }
-  return;
-}
-
-export async function createProject(options) {
-  options = {
-    ...options,
-    targetDirectory: options.targetDirectory || process.cwd(),
-    email: 'hi@dominik.dev',
-    name: 'Dominik Kundel',
-  };
-
-  const fullPathName = new URL(import.meta.url).pathname;
-  const templateDir = path.resolve(
-    fullPathName.substr(fullPathName.indexOf('/')),
-    '../../templates',
-    options.template.toLowerCase()
-  );
-  options.templateDirectory = templateDir;
-
-  try {
-    await access(templateDir, fs.constants.R_OK);
-  } catch (err) {
-    console.error('%s Invalid template name', chalk.red.bold('ERROR'));
-    process.exit(1);
-  }
-
-  const tasks = new Listr(
-    [
-      {
-        title: 'Copy project files',
-        task: () => copyTemplateFiles(options),
-      },
-      {
-        title: 'Create gitignore',
-        task: () => createGitignore(options),
-      },
-      {
-        title: 'Create License',
-        task: () => createLicense(options),
-      },
-      {
-        title: 'Initialize git',
-        task: () => initGit(options),
-        enabled: () => options.git,
-      },
-      {
-        title: 'Install dependencies',
-        task: () =>
-          projectInstall({
-            cwd: options.targetDirectory,
-          }),
-        skip: () =>
-          !options.runInstall
-            ? 'Pass --install to automatically install dependencies'
-            : undefined,
-      },
-    ],
-    {
-      exitOnError: false,
+function generateName(pascalName) {
+    const name = {
+        pascal: pascalName,
+        snake: _.snakeCase(pascalName),
+        camel: _.camelCase(pascalName),
+        constant: _.upperCase(pascalName).replace(/ /g, '_')
     }
-  );
 
-  await tasks.run();
-  console.log('%s Project ready', chalk.green.bold('DONE'));
-  return true;
+
+    name.camelPlural = pluralize(name.camel);
+    name.snakePlural = pluralize(name.snake);
+    return name;
+}
+
+
+async function createControllerFile(params, copyDir) {
+    const text = await ejs.renderFile(`${templateControllerDir}/controller.ejs`, params);
+    fs.writeFileSync(`${copyDir}/controller.js`, js_beautify(text));
+
+}
+async function createRequestFile(params, copyDir) {
+    const text = await ejs.renderFile(`${templateControllerDir}/request.ejs`, params);
+    fs.writeFileSync(`${copyDir}/request.js`, js_beautify(text));
+
+}
+async function createResponseFile(params, copyDir) {
+    const text = await ejs.renderFile(`${templateControllerDir}/response.ejs`, params);
+    fs.writeFileSync(`${copyDir}/response.js`, js_beautify(text));
+
+}
+export async function createController(options) {
+    const name = generateName(options.name);
+
+    const params = {
+        app: options.app,
+        ...name
+    }
+
+    const copyDir = `${options.path}/src/apps/${options.app}/services/api/${name.camel}/${options.version}`;
+
+    const tasks = new Listr([{
+        title: `Create folder ${name.camel}`,
+        task: async () => {
+            if (!fs.existsSync(copyDir)) {
+                await mkdirp(copyDir);
+            }
+        }
+    }, {
+        title: 'Copy controller',
+        task: () => createControllerFile(params, copyDir)
+    }, {
+        title: 'Copy request',
+        task: () => createRequestFile(params, copyDir)
+    }, {
+        title: 'Copy response',
+        task: () => createResponseFile(params, copyDir)
+    }]);
+
+
+    tasks.run().catch(err => {
+        process.exit(1);
+
+    });
 }
