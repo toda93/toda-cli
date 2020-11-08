@@ -9,7 +9,7 @@ export const paginateOptions = {
 
 export const rulesCreate = {}
 export const rulesModify = _.mapValues(rulesCreate, (obj) => {
-    obj.optional = true;
+    return {...obj, optional: true};
 });
 
 
