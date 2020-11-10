@@ -94,7 +94,7 @@ export default {
             ], USER_LEVEL.ADMIN),
             async (req, res) => {
                 const item = await <%= camel %>Repository.findOneById(req.params.id);
-                if (item) return res.error(NOT_EXISTS);
+                if (!item) return res.error(NOT_EXISTS);
 
                 await <%= camel %>Repository.delete(item);
                 return res.success(true);
