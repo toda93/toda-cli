@@ -4,7 +4,7 @@ import {NOT_EXISTS} from '@azteam/error';
 import {<%= constant %>_ROLE} from 'src/constants/role';
 import {HTTP_METHOD, REQUEST_TYPE} from 'src/constants/system';
 import {USER_LEVEL} from 'src/constants/variable';
-import {rulesID} from 'src/constants/validate';
+import {rulesID, rulesSlug} from 'src/constants/validate';
 
 import <%= camel %>Repository from 'src/apps/<%= app %>/repositories/<%= camel %>/repository';
 
@@ -13,6 +13,25 @@ import {allowResponse, guardResponse} from './response';
 
 
 export default {
+    /*
+     *  Common Role
+     */
+
+    findOneBySlug: {
+        path: '/pet_categories/detail/:slug',
+        type: HTTP_METHOD.GET,
+        method: [
+            validateMiddleware(REQUEST_TYPE.PARAMS, rulesSlug),
+            async (req, res) => {
+                const item = await <%= camel %>Repository.findOneBySlug(req.params.slug);
+                if (!item) return res.error(NOT_EXISTS);
+
+                return res.success(item);
+            }
+        ],
+    },
+
+
     /*
      *  Admin Role
      */
