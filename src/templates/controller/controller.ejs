@@ -115,7 +115,7 @@ export default {
                 const item = await <%= camel %>Repository.findOneById(req.params.id);
                 if (!item) return res.error(NOT_EXISTS);
 
-                await <%= camel %>Repository.delete(item);
+                await <%= camel %>Repository.deleteByUser(req.user.id, item);
                 return res.success(true);
             }
         ],
