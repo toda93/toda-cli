@@ -1,5 +1,5 @@
 import _ from 'lodash';
-
+import {schemaBoolean} from 'src/constants/validate';
 
 export const paginateOptions = {
     searchFields: [],
@@ -8,8 +8,11 @@ export const paginateOptions = {
 
 
 export const rulesCreate = {}
-export const rulesModify = _.mapValues(rulesCreate, (obj) => {
-    return {...obj, optional: true};
-});
+export const rulesModify = {
+    forceModify: schemaBoolean(true),
+    ..._.mapValues(rulesCreate, function (obj) {
+        return {...obj, optional: true};
+    })
+}
 
 
